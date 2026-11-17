@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Receipts</title>
+  <meta name="description" content="A research agent where every sentence shows its source: verbatim quotes checked against the page, an independent fact-check, and a link that opens each source at the quoted line.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M7 3h18v26l-3-2-3 2-3-2-3 2-3-2-3 2z' fill='%23111'/><path d='M11 10h10M11 15h10M11 20h6' stroke='%23fff' stroke-width='2'/></svg>">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 3h18v26l-3-2-3 2-3-2-3 2-3-2-3 2z"/><path class="ln" d="M11 10h10M11 15h10M11 20h6"/></svg>
+      <div>
+        <h1>Receipts</h1>
+        <p class="tag">Research answers that show their receipts.</p>
+      </div>
+    </div>
+    <div class="mode" id="mode">checking…</div>
+  </header>
+
+  <main>
+    <section class="ask">
+      <form id="askForm">
+        <label for="q" class="sr">Research question</label>
+        <textarea id="q" rows="2" maxlength="600" placeholder="Ask a research question… e.g. What changed in the EU AI Act timeline this year?"></textarea>
+        <button id="askBtn" type="submit">Research</button>
+      </form>
+      <div class="examples" id="examples"></div>
+      <p class="hint">Every sentence cites a verbatim quote that a program found on the source page. A separate model fact-checks each sentence; anything unsupported is fixed or removed, and you see what was removed.</p>
+    </section>
+
+    <div class="grid">
+      <section class="answer card" id="answerCard" hidden>
+        <div class="status" id="status"></div>
+        <div class="stats" id="stats"></div>
+        <article class="prose" id="answer"></article>
+        <div id="receipt" class="receipt" hidden></div>
+        <div id="conflicts"></div>
+        <div id="gaps"></div>
+        <div id="repairs"></div>
+        <div class="actions" id="actions" hidden>
+          <button type="button" id="copyMd">Copy as Markdown</button>
+          <button type="button" id="dlJson">Download JSON</button>
+          <button type="button" id="showSources">All sources</button>
+        </div>
+        <div id="sources" hidden></div>
+      </section>
+
+      <aside class="trace card" id="traceCard" hidden>
+        <div class="trace-head">
+          <h2>Research trace</h2>
+          <span class="live" id="live"></span>
+        </div>
+        <div class="meter" id="meter"></div>
+        <ol class="steps" id="steps"></ol>
+      </aside>
+    </div>
+
+    <section class="how" id="how">
+      <h2>How it works</h2>
+      <ol>
+        <li><b>Plan.</b> A fast open model splits the question into sub-questions, each with a search query and a <i>counter-evidence</i> query that looks for disagreement or newer figures.</li>
+        <li><b>Search.</b> Tavily returns live pages with full text. Duplicates (same page, syndicated copies) are merged.</li>
+        <li><b>Read.</b> The model copies verbatim quotes from each page. A program checks every quote against the page text and throws away any it can't find.</li>
+        <li><b>Audit coverage.</b> A stronger model checks which sub-questions are thin, missing or contested and runs follow-up searches, or stops.</li>
+        <li><b>Write.</b> The answer is written one sentence at a time, each citing evidence ids. Facts and inferences are labelled separately.</li>
+        <li><b>Fact-check and repair.</b> A different model checks each sentence against only its cited quotes, and a rule checks that every figure appears in them. Failing sentences are narrowed or removed, and the removals are shown.</li>
+      </ol>
+      <p>All inference runs on open models on <b>Nebius Token Factory</b>; all search on <b>Tavily</b>. Web text is always passed as untrusted data, never as instructions.</p>
+    </section>
+  </main>
+  <footer>Built for the ODSC × Nebius Hackathon · <a href="https://github.com/mritopper/receipts" target="_blank" rel="noopener">Source on GitHub</a></footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

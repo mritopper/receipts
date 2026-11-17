@@ -1,0 +1,7 @@
+[
+  {"id": "eu-ai-act", "label": "EU AI Act: what changed in the timeline?", "question": "What changed in the EU AI Act's implementation timeline in 2025 and 2026, and which obligations apply now?"},
+  {"id": "datacenter-power", "label": "US data centre electricity demand", "question": "What share of US electricity do data centers use today, and how fast is that share expected to grow?"},
+  {"id": "fasting", "label": "Intermittent fasting vs calorie counting", "question": "Is intermittent fasting more effective than ordinary calorie restriction for weight loss in adults?"},
+  {"id": "token-factory", "label": "Open models on Nebius Token Factory", "question": "Which open-weight model families can you run on Nebius Token Factory, and how is it priced?"},
+  {"id": "nobel-2027", "label": "Insufficient evidence: 2027 Nobel Prize", "question": "Who won the 2027 Nobel Prize in Physics, and for what discovery?"}
+]

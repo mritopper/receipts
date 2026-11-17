@@ -1,0 +1,16 @@
+# One-click deploy: https://render.com/deploy (connect the GitHub repo, then paste the two keys when asked).
+services:
+  - type: web
+    name: receipts
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NEBIUS_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: RC_DAILY_BUDGET_USD   # hard stop for the public demo's spend per day
+        value: "3"
+      - key: RC_RATE_PER_HOUR      # live questions per visitor per hour
+        value: "6"
