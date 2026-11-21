@@ -4,11 +4,10 @@
 
 **One-line pitch:** Ask a research question and get a short answer where every sentence links to the exact sentence on a live web page that supports it. A program checks that each quote is really on the page, a second model checks each sentence against its quotes, and anything that fails is fixed or removed in front of you.
 
-- **Demo video (2–3 min):** [[VIDEO_URL]]
-- **Live demo:** [[LIVE_URL]] (recorded runs replay instantly; live questions are rate-limited)
+- **Demo video (2–3 min):** linked in the submission form (mock mode, labelled)
 - **Team:** Mridhula Srinivasan ([@mritopper](https://github.com/mritopper))
 
-![Receipts answering a question; a receipt card shows the verbatim quote, source, date and a link that opens the page at that quote](docs/screenshot.png)
+> **Status at the deadline (read this first).** The Nebius Token Factory account behind this entry had no credit when the code was finished: every chat call returned `HTTP 402 insufficient_quota`, although the key was valid (`/v1/models` discovery worked and picked one model per role, below). Tavily calls are live and working. So **no live end-to-end run or benchmark was recorded**, and I am not presenting any. Everything shown in the demo video runs in `RC_MOCK=1` mode, which is labelled "MOCK DATA, NOT A REAL RESULT" on screen. The full loop is exercised by 24 offline tests against fakes of both APIs. With a funded key, `python scripts/smoke.py`, then `python src/agent.py "..."`, then `python eval/run_eval.py` produce the real numbers.
 
 ## The problem
 
@@ -89,7 +88,7 @@ flowchart LR
 
 | Requirement | How Receipts uses it |
 |---|---|
-| **Nebius Token Factory** (inference) | All inference: planner, page reader, coverage audit, writer, fact-checker and repair, via the OpenAI-compatible `/v1/chat/completions`. Models are **discovered from `/v1/models` at start-up** (with live per-token pricing for the cost meter), one per role. Models used for the recorded runs: [[MODELS]]. Hybrid-reasoning models get thinking switched off (`chat_template_kwargs`) because every role returns short structured JSON. Override any role with `RC_MODEL_FAST` / `RC_MODEL_STRONG` / `RC_MODEL_CHECK`. |
+| **Nebius Token Factory** (inference) | All inference: planner, page reader, coverage audit, writer, fact-checker and repair, via the OpenAI-compatible `/v1/chat/completions`. Models are **discovered from `/v1/models` at start-up** (with live per-token pricing for the cost meter), one per role. Models discovered for this account: fast = `Qwen/Qwen3-30B-A3B-Instruct-2507`, strong = `Qwen/Qwen3-235B-A22B-Instruct-2507`, check = `openai/gpt-oss-120b` (a different model family from the writer). Hybrid-reasoning models get thinking switched off (`chat_template_kwargs`) because every role returns short structured JSON. Override any role with `RC_MODEL_FAST` / `RC_MODEL_STRONG` / `RC_MODEL_CHECK`. |
 | **Tavily** (real-time web search) | Every piece of evidence comes from Tavily: `search_depth` advanced/basic per query type, `include_raw_content` so quotes can be verified against full page text, `time_range` for time-sensitive questions, `published_date` for dates. `include_answer` is **off**: the answer is written only from page text, never from a search summary. Tavily result URLs survive into every receipt and every exported footnote. |
 
 API keys are read from `.env` (git-ignored) and never logged. The UI and trace show model names, token counts and cost, never credentials.
@@ -129,11 +128,11 @@ pip install -r requirements-dev.txt && pytest -q
 
 ## Example
 
-[[EXAMPLE]]
+Run `RC_MOCK=1 uvicorn receipts.server:app --port 8000` and ask anything to see the full interface on canned offline pages: the live trace, receipt cards with the quote highlighted, a fabricated quote rejected because it is not on the page, a source flagged for prompt-injection text, and an unsupported sentence removed by the fact-check and listed under *Caught by the fact-check*. This is mock data and is labelled as such. No live example is included because no live run could be made (see Status above).
 
 ## Failure and insufficient-evidence cases
 
-- **The web has no answer.** *"Who won the 2031 FIFA Women's World Cup final?"* [[INSUFFICIENT_EXAMPLE]]
+- **The web has no answer.** *"Who won the 2031 FIFA Women's World Cup final?"* The agent searches, finds no verified evidence, and returns **Insufficient evidence** with the queries it ran, without asking a model to write anything (`tests/test_agent.py::test_no_results_gives_insufficient_without_writing`).
 - **A search returns nothing.** The trace shows `no results`. With a date filter, the agent retries once without it ("filter removed, retried").
 - **A tool fails.** Tavily or Token Factory errors are retried with backoff. A search round where every call failed produces a visible warning, and failures are listed in the report (`stats.failures`). With no verified evidence, the agent stops and says "Insufficient evidence" without asking a model to write anything.
 - **The model makes up a quote.** The program can't find it on the page, so it's rejected and shown struck through in the trace under "quotes not found on the page".
@@ -143,7 +142,7 @@ pip install -r requirements-dev.txt && pytest -q
 
 `eval/run_eval.py` runs [12 questions](eval/questions.jsonl) (current events, contested science, factual, and 2 that the web can't answer) through the **hackathon template's agent** (one Tavily search, one Token Factory call) and through **Receipts**, both on the same writer model. The **same independent checker model** then labels every answer sentence against the text it cites. Every number below is written by the script to [`eval/RESULTS.md`](eval/RESULTS.md); none are hand-entered.
 
-[[RESULTS]]
+**Not run.** The benchmark needs live Token Factory calls, and the account had no credit before the deadline (HTTP 402). The script refuses to run in mock mode, so there are no numbers here rather than made-up ones.
 
 ## Judging criteria map
 
